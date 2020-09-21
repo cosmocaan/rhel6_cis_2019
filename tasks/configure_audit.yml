@@ -1,0 +1,41 @@
+---
+## Configure Audit Policy
+
+# Enable Audit Service
+- name: Enable Audit Service
+  service: 
+    name: auditd
+    state: started
+    enabled: yes
+
+- name: Configure CIS Audit Rules
+  copy:
+    src: CIS_auditRedhat6.rules
+    dest: /etc/audit/rules.d/audit.rules
+    owner: root
+    group: root
+    mode: 0640
+
+- name: move password-auth and system-auth links to point to new files
+  file:
+    state: link
+    src: '/etc/audit/rules.d/{{ item }}'
+    path: '/etc/audit/{{ item }}'
+    force: yes
+  with_items:
+    - audit.rules
+
+- name: Configure auditd.conf
+  lineinfile:
+    line: '{{ item.line }}'
+    regexp: '{{ item.regexp }}'
+    path: /etc/audit/auditd.conf
+  with_items: 
+    - { regexp: '^max_log_file\s?=', line: 'max_log_file = 8' }
+    - { regexp: '^space_left_action\s?=', line: 'space_left_action = email' }
+    - { regexp: '^action_mail_acct\s?=', line: 'action_mail_acct = root' }
+    - { regexp: '^admin_space_left_action\s?=', line: 'admin_space_left_action = suspend' }
+    - { regexp: '^max_log_file_action\s?=', line: 'max_log_file_action = keep_logs' }
+  notify: restart auditd service
+
+...

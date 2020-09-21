@@ -1,0 +1,11 @@
+---
+- name: postbuild for RHEL6 standard server
+  become: true
+  hosts: phx10lclean3002
+  vars:
+#    - grey_interface: ens224
+#    - grey_gateway: 10.186.197.1
+    #- sat6: "esappp0177.corpaa.aa.com"
+  roles:
+    - rhel6_cis_2019
+...
